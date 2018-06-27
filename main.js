@@ -5,7 +5,10 @@ var ctx = canvas.getContext('2d');
 //2. CONSTANTES
 var interval;
 var cuadros;
-
+var fire = [];
+var sonidos = {
+    ost: ('./sounds/koc.mp3'),
+}
 var imagenes = {
     human: ('./images/Characters/Humanity/Human-fighter_1.png'),   
     humanfireball: ('./images/Characters/Humanity/Human-fireball.png'),
@@ -15,12 +18,14 @@ var imagenes = {
     //fondo: ('./images/bg/bg-1.png')
     //fondo: ('./images/bg/space-artworkjpg.jpg')
 };
-var fire = [];
-var sonidos = { tema: ('./sounds/MarioMainTheme.mp3')};
+var sound = new Audio();
+    sound.src = sonidos.ost;
+    sound.loop = true;
+
 
 
 //3. CLASES
-class Tablero {
+class Mapa {
     constructor() {
     this.x = 0;
     this.y = 0;
@@ -38,15 +43,15 @@ class Tablero {
         ctx.drawImage(this.image, this.x,this.y,this.width,this.height);
         ctx.drawImage(this.image, this.x + this.width,this.y,this.width,this.height); //Dibujate en 'X' después de ti misma con la misma altura y misma longitud
     }
-} //Termina la clase Tablero
+} //Termina la clase MAPA
       
 
 class Human {
     constructor(){
-        this.x = 10;
-        this.y = 10;
         this.width = 50;
         this.height = 50;
+        this.x = 10;
+        this.y = ((canvas.height/2) - (this.height/2)); // Posición inicial en el centro del mapa.
         this.image = new Image();
         this.image.src = imagenes.human;
         this.image.onload = function(){
@@ -62,8 +67,8 @@ class Human {
 
     class HumanFireball {
         constructor(){
-            this.x = 120; //this.x + human.x posicion automatica delante del human
-            this.y = 35;
+            this.x = human.x + human.width; //posición automática delante de Character
+            this.y = human.y;
             this.width = 40;
             this.height = 50;
             this.image = new Image();
@@ -80,10 +85,10 @@ class Human {
 
     class Alien {
         constructor(){
-            this.x = 924;//canvas.width - 100;//
-            this.y = 20;
-            this.width = 80;
-            this.height = 90;
+            this.x = canvas.width-100; // 964;//canvas.width - 100;//
+            this.y = 235;
+            this.width = 50;
+            this.height = 50;
             this.image = new Image();
             this.image.src = imagenes.alien;
             this.image.onload = function(){
@@ -116,7 +121,7 @@ class Human {
 
 
 //4. INSTANCIAS
-var tablero = new Tablero();
+var mapa = new Mapa();
 var human = new Human();
 var humanFireball = new HumanFireball();
 var alien = new Alien();
@@ -126,7 +131,7 @@ var alienFireball = new AlienFireball();
 function update(){
     cuadros++;
     ctx.clearRect(0,0,canvas.width,canvas.height);
-    tablero.draw();
+    mapa.draw();
     human.draw();
     humanFireball.draw();
     alien.draw();
@@ -136,6 +141,7 @@ function update(){
 function start(){
     if (interval) return;
     interval = setInterval(update, 1000/60);
+    sound.play()
 
 }
 
@@ -154,14 +160,25 @@ function drawDisparo(){
 //7. LISTENERS
 addEventListener('keydown', function (e){
     switch(e.keyCode) {
+
+    //     if (mario.x === 0) return //Si mario llegó a cero, ya no restes (return)
+    //     mario.x -= 64;
+    //     break;
+    // case 39://Right arrow key
+    // if (mario.x === canvas.width - mario.width) return 
+    //     mario.x += 64;
+    //     break;
+
+
         case 38: //ArrowUp
-            if (human.y - human.height  < 0) return;    // Si la posición en 'Y' de 'humano' menos la altura propia de 'humano'
-            human.y -=100;                          // ES MAYOR QUE cero, entonces ya no avances hacia arriba;
+            if (human.y - (human.height/2 + 10)  < 0) return;    // Si la posición en 'Y' de 'humano' menos la altura propia de 'humano'
+            human.y -=30;   
+            sound.play()                       // ES MAYOR QUE cero, entonces ya no avances hacia arriba;
                 break;
-        case 40://ArrowDown
-            if (human.y + human.height > canvas.height) return;
+        case 40: //ArrowDown
+            if (human.y + human.height/2 + 50> (canvas.height)) return;
             console.log(canvas.height)
-                human.y += 100;
+                human.y += 30;
                 break;
         case 76:  //KeyL
             console.log("Disparando con L");
@@ -171,12 +188,17 @@ addEventListener('keydown', function (e){
            
             //ACCIONES PARA ALIEN/UP2
         case 87: //KeyW -> UP
+        if (alien.y - (alien.height/2 + 10)  < 0) return;    // Si la posición en 'Y' de 'humano' menos la altura propia de 'humano'
+        alien.y -=30;                          // ES MAYOR QUE cero, entonces ya no avances hacia arriba;
+            break;
+
             if (alien.y - alien.height < 0) return; // Si la posición en 'Y' de 'alien' menos la altura propia de 'alien'    
             alien.y -= 100;                         // ES MAYOR QUE cero, entonces ya no avances hacia arriba;
             break;
         case 83: //KeyS -> Down
-            if (alien.y === 0) return;
-            alien.y += 100;
+        if (alien.y + alien.height/2 + 50> (canvas.height)) return;
+        console.log(canvas.height)
+            alien.y += 30;
             break;
         case 70: //KeyF
             disparar();
@@ -186,3 +208,10 @@ addEventListener('keydown', function (e){
 });
 
 start();
+
+// disparar balas
+// multitudes
+//multiplayer
+//teclas simultaneas
+//pantalla de seleccion
+//Arrlglasr clases
